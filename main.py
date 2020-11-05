@@ -1,12 +1,5 @@
 from PIL import Image
 
-def lengthOfListOfList(inputList):
-    total = 0
-    for i in inputList:
-        for j in i:
-            total += 1
-    return total
-
 def loadImage(path):
     i = Image.open(path)
     imageData = i.getdata()
@@ -19,7 +12,7 @@ def payloadToBinaryList(payload):
     
     for char in payload:
         characterList.append(ord(char))
-    characterList.append(ord(" ")) #last number can sometimes become jumbled.
+    characterList.append(ord(" ")) #End of message. 
     
     #Add length of list to start.
     payloadByteLength = len(characterList)
@@ -44,7 +37,7 @@ def payloadToBinaryList(payload):
 def replaceData(imageData, payload):
     payloadBitList = payloadToBinaryList(payload)
     
-    if len(payloadBitList) <= lengthOfListOfList(imageData): #Todo, just *3 remove method
+    if len(payloadBitList) <= (len(imageData) * 3): #*3 for RGB
         j = 0
         for i in range(len(payloadBitList)//3):
             for rgb in range(3):
@@ -68,14 +61,12 @@ def lsbToCharacters(inList):
     messageLength = 0
     tempList = []
     for i in range(24):
-        #tempList.append(inList[i])
-        # Can do something like x = x << 0 |i for each iteration. So don't have to think about strings. Can also do this below I believe. 
         messageLength = (messageLength << 1) | inList[i] 
         
     bitCount = 0
     outList = []
     byte = 0
-    for bit in range(24, (messageLength*8) + 24): #TODO use length 
+    for bit in range(24, (messageLength*8) + 24): #ignore first 3 bytes of message, loop through each of remaining bits. 
         if bitCount < 8:
             byte = (byte << 1) | inList[bit]
             bitCount += 1
@@ -85,7 +76,7 @@ def lsbToCharacters(inList):
             bitCount = 0
     return(outList)
 
-def decode(path): #Supposed to store length
+def decode(path):
     data = loadImage(path)
     dataList = list(map(list, data)) #Python has funky tuple rules
     extractedList = []
@@ -99,18 +90,36 @@ def decode(path): #Supposed to store length
     message = ''
     for i in range(len(byteList)):
         message += byteList[i]
-    print(message)
+    
+    f = open("secret.txt", "w")
+    f.write(message)
+    f.close()
+    
+    return(message)
     
     
 if __name__ == "__main__":
-    imageData = loadImage("glasgow.bmp")
-    size = imageData.size
-    mode = imageData.mode
-    dataList = list(map(list, imageData)) #Python has funky tuple rules
-        
-    newData = replaceData(dataList, "Hello")
 
-    dataTuples = list(map(tuple,newData))
-    saveImage(dataTuples, size, mode)
+    while True:
+        usrInput = input("Hide, or Decode? (h or d)\n")
+        if usrInput == "h":
+            filename = input("Name of image: (must be .bmp and in this folder)\n")
+            imageData = loadImage(filename + ".bmp")
+            size = imageData.size #Storing for later
+            mode = imageData.mode #Storing for later
+            dataList = list(map(list, imageData)) #Python has funky tuple rules
 
-    decode("secret.bmp")
+            f = open("message.txt")
+            newData = replaceData(dataList, f.read())
+            f.close()
+            dataTuples = list(map(tuple,newData))
+            saveImage(dataTuples, size, mode)
+            
+            print("Message hidden. Sssshhh it's a secret...")
+            break
+        elif usrInput == "d":
+            filename = input("Name of image: (must be .bmp and in this folder)\n")
+            print(decode("secret.bmp"))
+            print("The full message can be seen in secret.txt")
+            break
+        print("Invalid input")
