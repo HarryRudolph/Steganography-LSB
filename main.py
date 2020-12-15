@@ -19,10 +19,10 @@ def payloadToBinaryList(payload):
 
     #3 bytes to store size of message. 16,777,215 bytes(ASCII characters) max
     binaryLength = payloadByteLength | (1<<24) #Binary representation of length, need the 1 to keep in onder
-
+    
     j = 0
     for i in bin(binaryLength):
-        if j > 2: #To Ignore 0b1.... 
+        if j > 2: #To Ignore 0b1...
             payloadBitList.append(int(i))
         j += 1
         
@@ -66,7 +66,7 @@ def lsbToCharacters(inList):
     bitCount = 0
     outList = []
     byte = 0
-    for bit in range(24, (messageLength*8) + 24): #ignore first 3 bytes of message, loop through each of remaining bits. 
+    for bit in range(24, (messageLength*8)): #ignore first 3 bytes of message, loop through each of remaining bits. 
         if bitCount < 8:
             byte = (byte << 1) | inList[bit]
             bitCount += 1

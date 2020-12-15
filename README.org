@@ -1,0 +1,10 @@
+* Steganography LSB
+A Python Script to hide an data inside an image using a Least Signifcant Bit Algorithm.
+
+** Usage
+The script takes the message from a message.txt file and hides it in any 24-bit BMP of your choosing. There is an example in the REPO (Pablo.bmp).
+
+The script can also decode an image to retrieve the message. 
+** Requirements
+- Python3
+- Python Imagine Library (Pillow)
